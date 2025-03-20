@@ -1,40 +1,57 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../lib/auth';
-import prisma from '../../lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { PrismaClient } from '@prisma/client';
+import { authOptions } from '../auth/[...nextauth]/route';
+
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user) {
-    return NextResponse.json(
-      { error: 'Vous devez être connecté pour soumettre un score' },
-      { status: 401 }
-    );
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
 
   try {
     const { points, imageUrl } = await request.json();
 
-    if (!points || !imageUrl) {
-      return NextResponse.json(
-        { error: 'Les points et l\'image sont requis' },
-        { status: 400 }
-      );
+    // Trouver ou créer la semaine en cours
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    let currentWeek = await prisma.week.findFirst({
+      where: {
+        startDate: {
+          lte: now,
+        },
+        endDate: {
+          gte: now,
+        },
+      },
+    });
+
+    if (!currentWeek) {
+      currentWeek = await prisma.week.create({
+        data: {
+          startDate: startOfWeek,
+          endDate: endOfWeek,
+        },
+      });
     }
 
-    if (typeof points !== 'number' || points < 0) {
-      return NextResponse.json(
-        { error: 'Le score doit être un nombre positif' },
-        { status: 400 }
-      );
-    }
-
+    // Créer le score
     const score = await prisma.score.create({
       data: {
         points,
         imageUrl,
         userId: session.user.id,
+        weekId: currentWeek.id,
       },
     });
 
@@ -43,33 +60,6 @@ export async function POST(request: Request) {
     console.error('Erreur lors de la création du score:', error);
     return NextResponse.json(
       { error: 'Erreur lors de la création du score' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function GET() {
-  try {
-    const scores = await prisma.score.findMany({
-      include: {
-        user: {
-          select: {
-            name: true,
-            image: true,
-          },
-        },
-      },
-      orderBy: {
-        points: 'desc',
-      },
-      take: 100,
-    });
-
-    return NextResponse.json(scores);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des scores:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la récupération des scores' },
       { status: 500 }
     );
   }

@@ -63,9 +63,15 @@ model Score {
   id        String   @id @default(cuid())
   points    Int
   imageUrl  String
-  createdAt DateTime @default(now())
+  date      DateTime @default(now())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekId    String
+  week      Week     @relation(fields: [weekId], references: [id])
+
+  @@index([date])
+  @@index([userId])
+  @@index([weekId])
 }
 
 model Week {

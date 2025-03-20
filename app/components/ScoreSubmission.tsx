@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import type { Session } from 'next-auth';
 
 export default function ScoreSubmission() {
   const [points, setPoints] = useState('');
@@ -15,7 +14,6 @@ export default function ScoreSubmission() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const session = useSession().data as Session | null;
     if (!session) {
       setError('Vous devez être connecté pour soumettre un score');
       return;

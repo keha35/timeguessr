@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../lib/auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
 // Nouvelle syntaxe pour la configuration de la route
 export const runtime = 'nodejs';
