@@ -5,11 +5,13 @@ import path from 'path';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// Nouvelle syntaxe pour la configuration de la route
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+interface DailyWinsResult {
+  wins: bigint;
+}
 
 export async function POST(request: NextRequest) {
   try {
