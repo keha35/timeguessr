@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  basePath: '/timeguessr',
-  assetPrefix: '/timeguessr/',
   images: {
     domains: [
       'localhost',

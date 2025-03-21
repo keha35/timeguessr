@@ -2,16 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
 
-// Nouvelle syntaxe pour la configuration de la route
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
-interface DailyWinsResult {
-  wins: bigint;
-}
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export async function POST(request: NextRequest) {
   try {

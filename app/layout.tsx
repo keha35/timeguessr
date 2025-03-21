@@ -3,14 +3,11 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TimeGuessr',
-  description: 'Guess the time in screenshots from games',
+  title: 'TimeGuessr - Compétition Hebdomadaire',
+  description: 'Compétition hebdomadaire TimeGuessr',
 };
 
 export default function RootLayout({
@@ -19,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body>
+    <html lang="fr">
+      <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
