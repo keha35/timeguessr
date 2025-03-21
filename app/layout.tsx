@@ -3,13 +3,10 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TimeGuessr Weekly',
+  title: 'TimeGuessr - Compétition Hebdomadaire',
   description: 'Compétition hebdomadaire TimeGuessr',
 };
 
@@ -20,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} font-sans`}>
+      <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
