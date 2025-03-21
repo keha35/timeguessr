@@ -18,7 +18,7 @@ declare module 'next-auth' {
 
 const prisma = new PrismaClient();
 
-export const authOptions = {
+const options = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
@@ -37,5 +37,5 @@ export const authOptions = {
   },
 };
 
-const handler = NextAuth(authOptions);
+const handler = NextAuth(options);
 export { handler as GET, handler as POST }; 
