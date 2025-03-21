@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { WeeklyRanking } from '../types/score';
+import type { WeeklyRanking } from '../types/score';
 import { getApiUrl } from '../utils/api';
 
 export default function WeeklyRankingComponent() {
@@ -51,7 +51,7 @@ export default function WeeklyRankingComponent() {
     );
   }
 
-  if (!ranking || !ranking.users || ranking.users.length === 0) {
+  if (!ranking || !ranking.scores || ranking.scores.length === 0) {
     return (
       <div className="text-center p-4 bg-yellow-100 rounded-lg">
         Aucun classement disponible pour cette semaine
@@ -59,21 +59,37 @@ export default function WeeklyRankingComponent() {
     );
   }
 
-  const weekStart = new Date(ranking.weekStart).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-  });
-  const weekEnd = new Date(ranking.weekEnd).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-  });
+  // Calculer le nombre de victoires par utilisateur
+  const userVictories = ranking.scores.reduce((acc, score) => {
+    if (!acc[score.userId]) {
+      acc[score.userId] = {
+        userId: score.userId,
+        userName: score.user.name || 'Anonyme',
+        userImage: score.user.image,
+        victories: 0
+      };
+    }
+    if (score.points === Math.max(...ranking.scores.map(s => s.points))) {
+      acc[score.userId].victories += 1;
+    }
+    return acc;
+  }, {} as Record<string, { userId: string; userName: string; userImage: string | null; victories: number }>);
+
+  // Convertir en tableau et trier par nombre de victoires
+  const sortedUsers = Object.values(userVictories).sort((a, b) => b.victories - a.victories);
 
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-center mb-6">
         Classement de la semaine
         <div className="text-sm font-normal text-gray-600">
-          Du {weekStart} au {weekEnd}
+          Du {new Date(ranking.startDate).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long'
+          })} au {new Date(ranking.endDate).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long'
+          })}
         </div>
       </h2>
       <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -92,7 +108,7 @@ export default function WeeklyRankingComponent() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {ranking.users.map((user, index) => (
+            {sortedUsers.map((user, index) => (
               <tr key={user.userId} className={index === 0 ? 'bg-yellow-50' : ''}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
@@ -110,7 +126,7 @@ export default function WeeklyRankingComponent() {
                       <div className="flex-shrink-0 h-10 w-10 relative">
                         <Image
                           src={user.userImage}
-                          alt={user.userName || 'Avatar'}
+                          alt={user.userName}
                           fill
                           className="rounded-full object-cover"
                         />
@@ -118,14 +134,14 @@ export default function WeeklyRankingComponent() {
                     )}
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {user.userName || 'Anonyme'}
+                        {user.userName}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {user.firstPlaceCount} {user.firstPlaceCount > 1 ? 'victoires' : 'victoire'}
+                    {user.victories} {user.victories > 1 ? 'victoires' : 'victoire'}
                   </div>
                 </td>
               </tr>
