@@ -1,19 +1,33 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { PrismaClient } from '@prisma/client';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '../auth/options';
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-  }
-
   try {
-    const { points, imageUrl } = await request.json();
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      );
+    }
+
+    const data = await request.json();
+    const { points, imageUrl } = data;
+
+    // Valider les données
+    if (!points || typeof points !== 'number' || !imageUrl) {
+      return NextResponse.json(
+        { error: 'Données invalides' },
+        { status: 400 }
+      );
+    }
 
     // Trouver ou créer la semaine en cours
     const now = new Date();
@@ -55,7 +69,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(score);
+    return NextResponse.json({ score });
   } catch (error) {
     console.error('Erreur lors de la création du score:', error);
     return NextResponse.json(

@@ -7,6 +7,9 @@ interface DailyWinsResult {
   wins: bigint;
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     // Récupérer tous les scores groupés par utilisateur
