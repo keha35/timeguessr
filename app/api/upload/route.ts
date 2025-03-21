@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../lib/auth';
 
 // Nouvelle syntaxe pour la configuration de la route
 export const runtime = 'nodejs';
